@@ -1,73 +1,106 @@
-const User = require("../models/UserSchema");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const { parse } = require("dotenv");
-
-const createJWT = require("../utils/createJWT");
-const createCookie = require("../utils/createCookie");
-
+const User = require('../models/UserSchema');
+const bcrypt = require('bcrypt');
+const createJWT = require('../utils/createJWT');
+const createCookie = require('../utils/createCookie');
 
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
 
 const authController = {
   login: async (req, res) => {
     try {
-        const { email, password } = req.body;
+      const { email, password } = req.body;
+      console.log("Login request:", req.body);
+      const user = await User.findOne({ email });
+      if (!user) {
+        console.log("User not found");
+        return res.status(404).send({ msg: "User not found" });
+      }
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "User not found" });
-        }
-
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
-        if (isPasswordCorrect) {
-            const jwtToken = await createJWT(email, user.role, user.name);
-            createCookie(res, jwtToken);
-            return res.status(200).json({ message: "Login successful" });
-        } else {
-            return res.status(400).json({ message: "Incorrect password" });
-        }
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (isPasswordCorrect) {
+        const jwtToken = await createJWT(user.name, email, user.role);
+        createCookie(res, jwtToken);
+        console.log("User logged in:", user);
+        res.status(202).send({ msg: "User found", user: user });
+      } else {
+        console.log("Invalid credentials");
+        res.status(400).send({ msg: "Invalid credentials" });
+      }
     } catch (error) {
-      console.log(error);
+      console.log("Error logging in:", error);
+      res.status(500).send({ msg: "Error logging in" });
     }
   },
 
   register: async (req, res) => {
     try {
-        const { name, email, password, repeatPassword } = req.body;
+      const { email, password, repeatPassword, name } = req.body;
+      console.log("Register request:", req.body);
+      
+      if (password !== repeatPassword) {
+        console.log("Passwords do not match");
+        return res.status(400).send({ msg: 'Passwords do not match' });
+      }
 
-        if (password !== repeatPassword) {
-            return res.status(400).json({ message: "Passwords do not match" });
-        }
+      // Only check if user with this email exists
+      let user = await User.findOne({ email });
+      if (user) {
+        console.log("User with this email already exists");
+        return res.status(400).send({ msg: 'User with this email already exists' });
+      }
 
-        let user = await User.findOne({ email });
-        if (user) {
-            return res.status(400).json({ message: "User with this email already exists" });
-        }
+      // Create the new user (with name, not username)
+      user = new User({ 
+        name, 
+        email, 
+        password 
+      });
+      
+      const salt = await bcrypt.genSalt(saltRounds);
+      user.password = await bcrypt.hash(password, salt);
+      
+      await user.save();
 
-        user = new User({ name, email, password });
-        const salt = await bcrypt.genSalt(saltRounds);
-        user.password = await bcrypt.hash(password, salt);
-        await user.save();
-
-        const jwtToken = await createJWT(email, user.role, user.name);
-        createCookie(res, jwtToken);
-
-        res.status(200).json({ message: "Registration successful", user: user });
+      const jwtToken = await createJWT(name, email, user.role);
+      createCookie(res, jwtToken);
+      
+      console.log("User registered successfully:", user);
+      res.status(201).send({ msg: 'User registered', user: user });
     } catch (error) {
-        console.log(error);
-        res.status(500).send({ msg: "Error registering user" });
+      console.log("Error registering user:", error);
+      res.status(500).send({ msg: "Error registering user" });
     }
   },
+
   logout: async (req, res) => {
     try {
-      res.clearCookie("jwt");
-      return res.status(200).json({ message: "Logout successful" });
+      res.clearCookie('jwt', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'strict'
+      });
+      console.log("User logged out");
+      res.status(200).send({ msg: "Logged out successfully" });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Error logging out" });
+      console.log("Error logging out:", error);
+      res.status(500).send({ msg: "Error logging out" });
     }
   },
+
+  getUser: async (req, res) => {
+    try {
+      console.log("Fetching user:", req.user);
+      const user = await User.findById(req.user._id).select('-password');
+      console.log("User fetched:", user);
+      if (!user) {
+        return res.status(404).send({ msg: "User not found" });
+      }
+      res.status(200).send(user);
+    } catch (error) {
+      console.log("Error fetching user:", error);
+      res.status(500).send({ msg: "Error fetching user" });
+    }
+  }
 };
 
 module.exports = authController;

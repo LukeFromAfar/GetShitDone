@@ -8,17 +8,17 @@ const noteSchema = new Schema({
   },
   note: {
     type: String,
-    required: true,
-  },
-  dueDate: {
-    type: Date,
-    default: null,
+    default: "", // Set a default empty string instead of making it required
   },
   user: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
-  }, 
+  },
+  dueDate: {
+    type: Date,
+    default: null, // Allow null for tasks without due dates
+  },
   important: {
     type: Boolean,
     default: false,
