@@ -4,7 +4,6 @@ import TaskInput from '../../components/TaskInput';
 import TaskItem from '../../components/TaskItem';
 import TaskDetailsPanel from '../../components/TaskDetailsPanel';
 import axios from 'axios';
-import importantImage from '../../assets/images/important.jpg';
 
 export default function Important() {
   const [tasks, setTasks] = useState([]);
@@ -15,10 +14,15 @@ export default function Important() {
   const fetchTasks = async () => {
     try {
       setIsLoading(true);
+      // Use the correct endpoint path from noteRoutes.js
       const response = await axios.get('/api/note/category/important', { 
         withCredentials: true 
       });
-      setTasks(response.data);
+      
+      // Filter out completed tasks on the client side
+      const activeTasks = response.data.filter(task => !task.completed);
+      
+      setTasks(activeTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {
@@ -32,7 +36,7 @@ export default function Important() {
 
   const handleTaskAdded = (newTask) => {
     // Only add the task to the list if it belongs to this category
-    if (newTask.important) {
+    if (newTask.important && !newTask.completed) {
       setTasks(prevTasks => [newTask, ...prevTasks]);
     }
   };
@@ -51,7 +55,7 @@ export default function Important() {
   
   const handleTaskUpdated = (updatedTask) => {
     // Check if the updated task still belongs in this category
-    const belongsInCategory = updatedTask.important;
+    const belongsInCategory = updatedTask.important && !updatedTask.completed;
     
     // Update the task in the current list if it still belongs
     setTasks(prevTasks => {
@@ -75,6 +79,11 @@ export default function Important() {
     
     // Keep the selected task updated
     setSelectedTask(updatedTask);
+    
+    // If task was completed, close the panel
+    if (updatedTask.completed && isPanelOpen && selectedTask && selectedTask._id === updatedTask._id) {
+      closePanel();
+    }
   };
   
   const handleTaskDeleted = (taskId) => {
@@ -96,8 +105,8 @@ export default function Important() {
   };
 
   return (
-    <div className="container mx-auto p-4 mb-20">
-      <h1 className="text-2xl font-bold mb-6 text-white">Important</h1>
+    <div className="container mx-auto p-16 h-screen flex flex-col">
+      <h1 className="text-5xl font-bold mb-6 p-4 text-white">Important</h1>
       <TaskInput onTaskAdded={handleTaskAdded} />
       
       {isLoading ? (
@@ -105,7 +114,7 @@ export default function Important() {
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : tasks.length > 0 ? (
-        <div className="space-y-3 mt-6">
+        <div className="flex-1 overflow-y-auto mt-8 rounded-lg">
           {tasks.map(task => (
             <TaskItem 
               key={task._id}

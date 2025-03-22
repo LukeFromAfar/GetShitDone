@@ -1,397 +1,391 @@
-import { useState, useEffect, useRef } from 'react';
-import { X, Star, Calendar, Trash2, Check, CalendarIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Star, Calendar, Trash2, Check, Edit, Save } from 'lucide-react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import ding1Sound from '../assets/sounds/ding1.mp3';
 
 export default function TaskDetailsPanel({ task, isOpen, onClose, onTaskUpdated, onTaskDeleted }) {
-  const [editedTask, setEditedTask] = useState({});
+  // State for current task data and edited version
+  const [editMode, setEditMode] = useState(false);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [dueDate, setDueDate] = useState(null);
+  const [isImportant, setIsImportant] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  
+  // Other state
   const [isLoading, setIsLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const panelRef = useRef(null);
   
-  // Sync state when task changes
+  // Function to play sound that creates a new Audio instance each time
+  const playSound = () => {
+    const audio = new Audio(ding1Sound);
+    audio.volume = 0.7; // Adjust volume (0.0 to 1.0)
+    
+    // Play and handle any errors
+    audio.play().catch(err => console.error("Error playing sound:", err));
+    
+    // Clean up when done playing to avoid memory leaks
+    audio.onended = () => {
+      audio.src = "";
+      audio.remove();
+    };
+  };
+  
+  // Initialize local state whenever task changes
   useEffect(() => {
-    // Only update if there's a valid task
-    if (task && task._id) {
-      setEditedTask(task);
+    if (task) {
+      setTitle(task.title || '');
+      setContent(task.note || '');
+      setDueDate(task.dueDate ? new Date(task.dueDate) : null);
+      setIsImportant(task.important || false);
+      setCompleted(task.completed || false);
+      setEditMode(false); // Exit edit mode when task changes
     }
   }, [task]);
   
-  // Handle click outside to close
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isOpen && panelRef.current && !panelRef.current.contains(event.target)) {
-        onClose();
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-  
-  // Don't render anything if panel is closed
-  if (!isOpen) return null;
-  
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditedTask(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const toggleImportant = async () => {
-    try {
-      if (!editedTask || !editedTask._id) return;
-      
-      setIsLoading(true);
-      const updatedTask = { ...editedTask, important: !editedTask.important };
-      
-      await axios.put(`/api/note/${editedTask._id}`, updatedTask, {
-        withCredentials: true
-      });
-      
-      setEditedTask(updatedTask);
-      if (onTaskUpdated) onTaskUpdated(updatedTask);
-    } catch (error) {
-      console.error('Error updating task importance:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const toggleCompleted = async () => {
-    try {
-      if (!editedTask || !editedTask._id) return;
-      
-      setIsLoading(true);
-      const updatedTask = { ...editedTask, completed: !editedTask.completed };
-      
-      await axios.put(`/api/note/${editedTask._id}`, updatedTask, {
-        withCredentials: true
-      });
-      
-      setEditedTask(updatedTask);
-      if (onTaskUpdated) onTaskUpdated(updatedTask);
-    } catch (error) {
-      console.error('Error updating task completion:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const handleDateChange = async (date) => {
-    try {
-      if (!editedTask || !editedTask._id) return;
-      
-      setIsLoading(true);
-      setShowDatePicker(false);
-      
-      const updatedTask = { ...editedTask, dueDate: date };
-      
-      await axios.put(`/api/note/${editedTask._id}`, updatedTask, {
-        withCredentials: true
-      });
-      
-      setEditedTask(updatedTask);
-      if (onTaskUpdated) onTaskUpdated(updatedTask);
-    } catch (error) {
-      console.error('Error updating due date:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const clearDueDate = async () => {
-    try {
-      if (!editedTask || !editedTask._id) return;
-      
-      setIsLoading(true);
-      setShowDatePicker(false);
-      
-      const updatedTask = { ...editedTask, dueDate: null };
-      
-      await axios.put(`/api/note/${editedTask._id}`, updatedTask, {
-        withCredentials: true
-      });
-      
-      setEditedTask(updatedTask);
-      if (onTaskUpdated) onTaskUpdated(updatedTask);
-    } catch (error) {
-      console.error('Error clearing due date:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const saveChanges = async () => {
-    try {
-      if (!editedTask || !editedTask._id) return;
-      
-      setIsLoading(true);
-      
-      await axios.put(`/api/note/${editedTask._id}`, editedTask, {
-        withCredentials: true
-      });
-      
-      if (onTaskUpdated) onTaskUpdated(editedTask);
-      onClose();
-    } catch (error) {
-      console.error('Error saving task changes:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const deleteTask = async () => {
-    if (!editedTask || !editedTask._id) return;
-    if (!window.confirm('Are you sure you want to delete this task?')) return;
-    
-    try {
-      setIsLoading(true);
-      
-      await axios.delete(`/api/note/${editedTask._id}`, {
-        withCredentials: true
-      });
-      
-      if (onTaskDeleted) onTaskDeleted(editedTask._id);
-      onClose();
-    } catch (error) {
-      console.error('Error deleting task:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const formatDate = (dateString) => {
-    if (!dateString) return 'No due date';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
+  // Format date for display
+  const formatDate = (date) => {
+    if (!date) return 'No due date';
+    return new Date(date).toLocaleDateString('en-GB', {
       weekday: 'long',
       day: 'numeric',
-      month: 'long',
+      month: 'long', 
       year: 'numeric'
     });
   };
+  
+  // Check if date is past due
+  const isPastDue = (date) => {
+    if (!date) return false;
+    const dueDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    return dueDate < today;
+  };
+  
+  // Toggle edit mode
+  const toggleEditMode = () => {
+    if (editMode) {
+      // If cancelling edit, reset to original values
+      if (task) {
+        setTitle(task.title || '');
+        setContent(task.note || '');
+        setDueDate(task.dueDate ? new Date(task.dueDate) : null);
+        setIsImportant(task.important || false);
+        setCompleted(task.completed || false);
+      }
+    }
+    setEditMode(!editMode);
+    setShowDatePicker(false);
+  };
+  
+  // Similarly, update the toggleCompleted function
+const toggleCompleted = async () => {
+    // Store the previous state
+    const wasCompleted = completed;
+    
+    // Toggle the state immediately for UI feedback
+    setCompleted(!wasCompleted);
+    
+    // Play sound only when marking as complete
+    if (!wasCompleted) {
+      playSound();
+    }
+    
+    // If not in edit mode, save immediately
+    if (!editMode && task) {
+      try {
+        setIsLoading(true);
+        
+        const updatedTask = {
+          ...task,
+          completed: !wasCompleted
+        };
+        
+        const response = await axios.put(`/api/note/${task._id}`, updatedTask, {
+          withCredentials: true
+        });
+        
+        // Check the structure of the response and extract the note data correctly
+        const savedTask = response.data.note || response.data;
+        
+        if (onTaskUpdated) onTaskUpdated(savedTask);
+      } catch (error) {
+        console.error('Error updating task:', error);
+        // Revert state on error
+        setCompleted(wasCompleted);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    // If in edit mode, just update the state - it will be saved on submit
+  };
+  
+  // Toggle important flag (in edit mode only)
+  const toggleImportant = () => {
+    if (editMode) {
+      setIsImportant(!isImportant);
+    }
+  };
+  
+  // Clear due date
+  const clearDueDate = () => {
+    setDueDate(null);
+    setShowDatePicker(false);
+  };
+  
+  // Save all changes
+  const handleSaveChanges = async () => {
+    if (!task) return;
+    
+    try {
+      setIsLoading(true);
+      
+      const updatedTask = {
+        ...task,
+        title,
+        note: content,
+        dueDate: dueDate ? dueDate.toISOString() : null,
+        important: isImportant,
+        completed
+      };
+      
+      const response = await axios.put(`/api/note/${task._id}`, updatedTask, {
+        withCredentials: true
+      });
+      
+        // Check the structure of the response and extract the note data correctly
+        const savedTask = response.data.note || response.data;
+        
+        if (onTaskUpdated) onTaskUpdated(savedTask);
+        setEditMode(false);
+    } catch (error) {
+        console.error('Error saving task:', error);
+    } finally {
+        setIsLoading(false);
+    }
+    };
+    
+  // Delete the task
+  const handleDeleteTask = async () => {
+    if (!task) return;
+    
+    if (!window.confirm('Are you sure you want to delete this task?')) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      await axios.delete(`/api/note/${task._id}`, {
+        withCredentials: true
+      });
+      
+      if (onTaskDeleted) onTaskDeleted(task._id);
+      onClose();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      // Could add an error notification here
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Check if we have a valid task
-  const hasValidTask = editedTask && editedTask._id;
-
-  // If no valid task is selected, show a placeholder
-  if (!hasValidTask) {
-    return (
-      <div 
-        className="fixed inset-y-0 right-0 w-full md:w-96 bg-gray-900 text-white shadow-lg transform transition-transform duration-300 z-50 flex flex-col"
-        ref={panelRef}
-        style={{transform: isOpen ? 'translateX(0)' : 'translateX(100%)'}}
-      >
-        <div className="flex items-center justify-between border-b border-gray-700 p-4">
-          <h2 className="text-lg font-semibold">Task Details</h2>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-        <div className="flex-1 flex flex-col items-center justify-center p-6">
-          <div className="animate-pulse flex flex-col items-center">
-            <div className="rounded-full bg-gray-700 h-16 w-16 mb-4"></div>
-            <div className="h-4 bg-gray-700 rounded w-2/3 mb-2"></div>
-            <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-            <p className="text-gray-400 text-center mt-8">Loading task details...</p>
-          </div>
-        </div>
-      </div>
-    );
+  if (!isOpen) {
+    return null;
   }
 
-  // Safe access of properties
-  const isCompleted = editedTask?.completed || false;
-  const isImportant = editedTask?.important || false;
-  const taskDueDate = editedTask?.dueDate || null;
-  const taskTitle = editedTask?.title || '';
-  const taskNote = editedTask?.note || '';
-
   return (
-    <div 
-      className="fixed inset-y-0 right-0 w-full md:w-96 bg-gray-900 text-white shadow-lg transform transition-transform duration-300 z-50 flex flex-col"
-      ref={panelRef}
-      style={{transform: isOpen ? 'translateX(0)' : 'translateX(100%)'}}
-    >
+    <div className={`fixed inset-y-0 right-0 w-full md:w-96 bg-gray-800 shadow-lg transform transition-transform duration-300 z-50 flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-700 p-4">
-        <div className="flex items-center">
-          <button
-            onClick={toggleCompleted}
-            className={`mr-3 w-6 h-6 rounded-full border flex items-center justify-center ${
-              isCompleted 
-                ? 'bg-blue-500 border-blue-500 text-white' 
-                : 'border-gray-500 hover:border-gray-300'
-            }`}
-            disabled={isLoading}
-          >
-            {isCompleted && <Check className="h-4 w-4" />}
-          </button>
-          <h2 className="text-lg font-semibold">Task Details</h2>
+      <div className="flex justify-between items-center p-4 border-b border-gray-700">
+        <h2 className="text-xl font-semibold text-white">Task Details</h2>
+        <div className="flex space-x-2">
+          {editMode ? (
+            <>
+              <button
+                onClick={handleSaveChanges}
+                disabled={isLoading}
+                className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                aria-label="Save changes"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                ) : (
+                  <Save size={20} />
+                )}
+              </button>
+              <button
+                onClick={toggleEditMode}
+                disabled={isLoading}
+                className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                aria-label="Cancel editing"
+              >
+                <X size={20} />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={toggleEditMode}
+                className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                aria-label="Edit task"
+              >
+                <Edit size={20} />
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                aria-label="Close panel"
+              >
+                <X size={20} />
+              </button>
+            </>
+          )}
         </div>
-        <button 
-          onClick={onClose}
-          className="text-gray-400 hover:text-white transition-colors"
-          disabled={isLoading}
-        >
-          <X className="h-6 w-6" />
-        </button>
       </div>
       
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-800">
+      <div className="flex-1 overflow-y-auto p-4">
+        {/* Title */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-300 mb-2">Title</label>
-          <input
-            type="text"
-            name="title"
-            value={taskTitle}
-            onChange={handleInputChange}
-            className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-            disabled={isLoading}
-          />
-        </div>
-        
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-300 mb-2">Note</label>
-          <textarea
-            name="note"
-            value={taskNote}
-            onChange={handleInputChange}
-            className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] text-white resize-none"
-            disabled={isLoading}
-          />
-        </div>
-        
-        <div className="space-y-4">
-          {/* Due Date Section */}
-          <div className="bg-gray-700 p-4 rounded-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Calendar className="h-5 w-5 text-gray-300" />
-                <span className="text-sm text-gray-200">
-                  {taskDueDate ? formatDate(taskDueDate) : 'No due date'}
-                </span>
-              </div>
-              <div className="relative">
-                <button
-                  onClick={() => setShowDatePicker(!showDatePicker)}
-                  className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
-                  disabled={isLoading}
-                >
-                  {taskDueDate ? 'Change' : 'Add date'}
-                </button>
-                
-                {showDatePicker && (
-                  <div className="absolute right-0 mt-2 z-10 bg-gray-700 shadow-lg rounded-md border border-gray-600">
-                    <div className="p-3">
-                      <style>
-                        {`
-                        .react-datepicker {
-                          background-color: #374151 !important;
-                          border-color: #4B5563 !important;
-                          color: white !important;
-                        }
-                        .react-datepicker__header {
-                          background-color: #1F2937 !important;
-                          border-color: #4B5563 !important;
-                        }
-                        .react-datepicker__current-month, 
-                        .react-datepicker__day-name,
-                        .react-datepicker__navigation {
-                          color: white !important;
-                        }
-                        .react-datepicker__day {
-                          color: #D1D5DB !important;
-                        }
-                        .react-datepicker__day:hover {
-                          background-color: #2563EB !important;
-                          color: white !important;
-                        }
-                        .react-datepicker__day--selected,
-                        .react-datepicker__day--keyboard-selected {
-                          background-color: #2563EB !important;
-                          color: white !important;
-                        }
-                        .react-datepicker__day--outside-month {
-                          color: #6B7280 !important;
-                        }
-                        .react-datepicker__triangle {
-                          display: none !important;
-                        }
-                        `}
-                      </style>
-                      <DatePicker
-                        selected={taskDueDate ? new Date(taskDueDate) : new Date()}
-                        onChange={handleDateChange}
-                        inline
-                      />
-                    </div>
-                    {taskDueDate && (
-                      <div className="p-3 text-center border-t border-gray-600">
-                        <button 
-                          onClick={clearDueDate}
-                          className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-                          disabled={isLoading}
-                        >
-                          Remove due date
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+          {editMode ? (
+            <div className="mb-4">
+              <label htmlFor="title" className="block text-sm font-medium text-gray-400 mb-1">Title</label>
+              <input
+                id="title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Task title"
+                disabled={isLoading}
+              />
             </div>
+          ) : (
+            <div className="flex items-center mb-4">
+              <button
+                onClick={toggleCompleted}
+                disabled={isLoading}
+                className={`mr-3 w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${
+                  completed 
+                    ? 'bg-blue-500 border-blue-500 text-white' 
+                    : 'border-gray-500 hover:border-gray-300'
+                }`}
+                aria-label={completed ? "Mark as incomplete" : "Mark as complete"}
+              >
+                {completed && <Check className="h-4 w-4" />}
+              </button>
+              <h3 className={`text-xl font-medium ${completed ? 'line-through text-gray-400' : 'text-white'}`}>
+                {title || 'Untitled Task'}
+              </h3>
+            </div>
+          )}
+        </div>
+        
+        {/* Due Date */}
+        <div className="mb-4">
+          <div className="flex items-center mb-2">
+            <Calendar className="text-gray-400 mr-2" size={18} />
+            <span className="text-sm font-medium text-gray-400">Due Date</span>
           </div>
           
-          {/* Important Section */}
-          <button
-            onClick={toggleImportant}
-            className="flex items-center justify-between w-full p-4 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors"
-            disabled={isLoading}
-          >
-            <div className="flex items-center space-x-3">
-              <Star 
-                className={`h-5 w-5 ${
-                  isImportant 
-                    ? 'text-yellow-500 fill-yellow-500' 
-                    : 'text-gray-300'
-                }`} 
-              />
-              <span className="text-gray-200">Important</span>
+          {editMode ? (
+            <div className="relative">
+                <div
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="w-full text-left p-2 bg-gray-700 border border-gray-600 rounded text-white hover:bg-gray-600 transition-colors flex justify-between items-center cursor-pointer"
+                >
+                <span>{dueDate ? formatDate(dueDate) : 'No due date'}</span>
+                {dueDate && (
+                    <span
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        clearDueDate();
+                    }}
+                    className="text-gray-400 hover:text-red-400 cursor-pointer"
+                    >
+                    <X size={16} />
+                    </span>
+                )}
+                </div>
+                
+                {showDatePicker && (
+                <div className="absolute left-0 mt-1 z-10 bg-gray-700 shadow-lg rounded-md border border-gray-600">
+                    <DatePicker
+                    selected={dueDate}
+                    onChange={(date) => {
+                        setDueDate(date);
+                        setShowDatePicker(false);
+                    }}
+                    inline
+                    className="bg-gray-700 text-white"
+                    />
+                </div>
+                )}
             </div>
-            <span className="text-sm text-gray-400">
-              {isImportant ? 'On' : 'Off'}
-            </span>
-          </button>
+            ) : (
+            <div className={`p-2 ${isPastDue(dueDate) ? 'text-red-500 line-through' : 'text-white'}`}>
+                {dueDate ? formatDate(dueDate) : 'No due date'}
+            </div>
+            )}
+        </div>
+        
+        {/* Important Flag */}
+        <div className="mb-4">
+        <div 
+            className={`flex items-center p-2 rounded ${
+            editMode ? 'cursor-pointer hover:bg-gray-700' : ''
+            }`}
+            onClick={editMode ? toggleImportant : undefined}
+        >
+            <Star 
+            className={`mr-2 ${
+                isImportant 
+                ? 'text-yellow-500 fill-yellow-500' 
+                : 'text-gray-400'
+            }`} 
+            size={18} 
+            />
+            <span className="text-sm font-medium text-gray-400">Important</span>
+            {/* Removed "Yes"/"No" text */}
+        </div>
+        </div>
+        
+        {/* Notes */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-400 mb-2">Notes</label>
+          {editMode ? (
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white min-h-[200px] resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Add notes..."
+              disabled={isLoading}
+            />
+          ) : (
+            <div className="p-2 bg-gray-700 rounded text-white min-h-[100px] whitespace-pre-wrap">
+              {content || <span className="text-gray-500 italic">No notes</span>}
+            </div>
+          )}
         </div>
       </div>
       
       {/* Footer */}
-      <div className="border-t border-gray-700 p-4 flex justify-between items-center bg-gray-900">
-        <button
-          onClick={deleteTask}
-          className="flex items-center text-red-400 hover:text-red-300 transition-colors"
-          disabled={isLoading}
-        >
-          <Trash2 className="h-5 w-5 mr-2" />
-          Delete task
-        </button>
-        
-        <button
-          onClick={saveChanges}
-          className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-md transition-colors disabled:bg-gray-600 disabled:text-gray-400"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Saving...' : 'Save changes'}
-        </button>
-      </div>
+      <div className="border-t border-gray-700 p-4">
+        <div className={`flex ${editMode ? 'justify-between' : 'justify-end'}`}>
+            <button
+            onClick={handleDeleteTask}
+            disabled={isLoading}
+            className="flex items-center text-red-500 hover:text-red-400"
+            >
+            <Trash2 size={18} className="mr-1" />
+            <span>Delete</span>
+            </button>
+        </div>
+        </div>
     </div>
   );
 }

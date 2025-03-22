@@ -112,7 +112,7 @@ export default function TaskInput({ onTaskAdded }) {
       <form onSubmit={handleSubmit} className="flex items-center">
         <button 
           type="submit" 
-          className="p-2 rounded-full hover:bg-gray-700 text-gray-400 hover:text-gray-200 transition-colors"
+          className="p-2 rounded-full hover:bg-gray-700 text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
           disabled={isLoading || !title.trim()}
         >
           <Plus className="h-6 w-6" />

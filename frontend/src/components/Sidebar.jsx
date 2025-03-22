@@ -45,14 +45,14 @@ export default function Sidebar() {
       <aside className="flex flex-col h-full relative">
         <button
           onClick={toggleSidebar}
-          className="p-2 focus:outline-none absolute top-2 left-2"
+          className="p-2 focus:outline-none absolute top-2 left-2 cursor-pointer"
         >
           {isOpen ? <ChevronLeft className="text-white" /> : <ChevronRight className="text-white" />}
         </button>
         <div className="flex items-center p-2 mt-10 justify-center pt-4">
-          <form onSubmit={handleSearchSubmit} className="flex items-center w-full">
-            <button type="submit" className="text-white">
-              <Search className="h-5 w-5" />
+          <form onSubmit={handleSearchSubmit} className="flex items-center justify-center w-full pt-4">
+            <button type="submit" className="text-white pr-3 cursor-pointer">
+              <Search className="h-5 w-5 ml-2" />
             </button>
             {isOpen && (
               <div className="relative flex-grow mx-2">

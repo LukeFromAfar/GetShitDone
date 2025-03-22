@@ -1,4 +1,5 @@
 const User = require('../models/UserSchema');
+const Note = require('../models/NoteSchema')
 const bcrypt = require('bcrypt');
 const createJWT = require('../utils/createJWT');
 const createCookie = require('../utils/createCookie');
@@ -99,6 +100,36 @@ const authController = {
     } catch (error) {
       console.log("Error fetching user:", error);
       res.status(500).send({ msg: "Error fetching user" });
+    }
+  },
+
+  deleteAccount: async (req, res) => {
+    try {
+      console.log("Deleting user account:", req.user._id);
+      
+      // First delete all user's notes
+      const deleteNotesResult = await Note.deleteMany({ user: req.user._id });
+      console.log(`Deleted ${deleteNotesResult.deletedCount} notes`);
+      
+      // Then delete the user
+      const user = await User.findByIdAndDelete(req.user._id);
+      
+      if (!user) {
+        return res.status(404).send({ msg: "User not found" });
+      }
+      
+      // Clear the authentication cookie
+      res.clearCookie('jwt', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'strict'
+      });
+      
+      console.log("User account deleted successfully");
+      res.status(200).send({ msg: "Account deleted successfully" });
+    } catch (error) {
+      console.log("Error deleting account:", error);
+      res.status(500).send({ msg: "Error deleting account" });
     }
   }
 };

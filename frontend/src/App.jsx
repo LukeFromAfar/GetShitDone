@@ -1,8 +1,8 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 import Layout from './pages/Layout'
 
-import Home from './pages/Home'
+// Remove the Home import
 import Login from './pages/authentication/Login'
 import Register from './pages/authentication/Register'
 
@@ -14,14 +14,14 @@ import User from './pages/User'
 
 import { AuthProvider } from './context/AuthContext';
 
-
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
+            {/* Redirect the root path to my-day */}
+            <Route index element={<Navigate to="/my-day" replace />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path="my-day" element={<MyDay />} />

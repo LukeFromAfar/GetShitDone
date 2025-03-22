@@ -1,137 +1,167 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { UserPlus, Mail, Lock, User, AlertCircle } from 'lucide-react';
 
 export default function Register() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    repeatPassword: ''
-  });
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState(''); // Add this field
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
   const { register } = useAuth();
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
-
-    if (formData.password !== formData.repeatPassword) {
+    
+    // Validate passwords match
+    if (password !== repeatPassword) {
       setError('Passwords do not match');
-      setIsLoading(false);
       return;
     }
+    
+    setIsLoading(true);
 
     try {
-      await register(formData);
+      // Pass a proper userData object with all required fields
+      await register({
+        name,
+        email,
+        password,
+        repeatPassword
+      });
       navigate('/my-day');
-    } catch (error) {
-      console.error('Registration error:', error.response?.data?.msg || 'An error occurred');
-      setError(error.response?.data?.msg || 'An error occurred during registration');
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Failed to register');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h1 className="text-2xl font-bold mb-6 text-center">Create an Account</h1>
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="w-full max-w-md p-8 bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
+          <p className="text-gray-300">Sign up to start getting shit done</p>
+        </div>
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+          <div className="mb-6 p-4 bg-red-500/20 backdrop-blur-sm border border-red-700 rounded-lg flex items-center">
+            <AlertCircle className="text-red-500 mr-2" size={20} />
+            <p className="text-red-100 text-sm">{error}</p>
           </div>
         )}
-        
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
               Name
             </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="name"
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="bg-gray-700/50 border border-gray-600 text-white block w-full pl-10 pr-3 py-3 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                placeholder="John Doe"
+              />
+            </div>
           </div>
-          
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
               Email
             </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="email"
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Mail className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-gray-700/50 border border-gray-600 text-white block w-full pl-10 pr-3 py-3 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                placeholder="your@email.com"
+              />
+            </div>
           </div>
-          
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
               Password
             </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-gray-700/50 border border-gray-600 text-white block w-full pl-10 pr-3 py-3 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                placeholder="••••••••"
+              />
+            </div>
           </div>
           
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="repeatPassword">
+          {/* Add confirm password field */}
+          <div>
+            <label htmlFor="repeatPassword" className="block text-sm font-medium text-gray-300 mb-2">
               Confirm Password
             </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="repeatPassword"
-              type="password"
-              name="repeatPassword"
-              placeholder="Confirm Password"
-              value={formData.repeatPassword}
-              onChange={handleChange}
-              required
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                id="repeatPassword"
+                type="password"
+                value={repeatPassword}
+                onChange={(e) => setRepeatPassword(e.target.value)}
+                required
+                className="bg-gray-700/50 border border-gray-600 text-white block w-full pl-10 pr-3 py-3 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                placeholder="••••••••"
+              />
+            </div>
           </div>
-          
-          <div className="flex items-center justify-between">
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Registering...' : 'Register'}
-            </button>
-            <Link
-              to="/login"
-              className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
-            >
-              Already have an account?
-            </Link>
-          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full flex justify-center items-center bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+          >
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+            ) : (
+              <>
+                <UserPlus className="mr-2 h-5 w-5" />
+                Create Account
+              </>
+            )}
+          </button>
         </form>
+
+        <div className="mt-8 text-center">
+          <p className="text-gray-400">
+            Already have an account?{' '}
+            <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium cursor-pointer">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

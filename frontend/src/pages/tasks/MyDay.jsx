@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Star, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
 import TaskInput from '../../components/TaskInput';
 import TaskItem from '../../components/TaskItem';
 import TaskDetailsPanel from '../../components/TaskDetailsPanel';
 import axios from 'axios';
-import myDayImage from '../../assets/images/my-day.jpg';
 
 export default function MyDay() {
   const [tasks, setTasks] = useState([]);
@@ -15,10 +14,15 @@ export default function MyDay() {
   const fetchTasks = async () => {
     try {
       setIsLoading(true);
+      // Use the correct endpoint path from noteRoutes.js
       const response = await axios.get('/api/note/category/my-day', { 
         withCredentials: true 
       });
-      setTasks(response.data);
+      
+      // Filter out completed tasks on the client side
+      const activeTasks = response.data.filter(task => !task.completed);
+      
+      setTasks(activeTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {
@@ -31,8 +35,7 @@ export default function MyDay() {
   }, []);
 
   const handleTaskAdded = (newTask) => {
-    // Only add the task to the list if it belongs to this category
-    // For MyDay, we check if the dueDate is today
+    // Only add the task to the list if it belongs to this category and is not completed
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -40,18 +43,15 @@ export default function MyDay() {
     
     const taskDate = newTask.dueDate ? new Date(newTask.dueDate) : null;
     
-    if (taskDate && taskDate >= today && taskDate < tomorrow) {
+    if (taskDate && taskDate >= today && taskDate < tomorrow && !newTask.completed) {
       setTasks(prevTasks => [newTask, ...prevTasks]);
     }
   };
   
   const handleTaskClick = (task) => {
-    // If we're already viewing a task and clicking a different one,
-    // update the selectedTask directly without closing the panel
     if (isPanelOpen && selectedTask && selectedTask._id !== task._id) {
       setSelectedTask(task);
     } else {
-      // Otherwise just open the panel with the selected task
       setSelectedTask(task);
       setIsPanelOpen(true);
     }
@@ -65,7 +65,7 @@ export default function MyDay() {
     tomorrow.setDate(tomorrow.getDate() + 1);
     
     const taskDate = updatedTask.dueDate ? new Date(updatedTask.dueDate) : null;
-    const belongsInCategory = taskDate && taskDate >= today && taskDate < tomorrow;
+    const belongsInCategory = taskDate && taskDate >= today && taskDate < tomorrow && !updatedTask.completed;
     
     // Update the task in the current list if it still belongs
     setTasks(prevTasks => {
@@ -89,6 +89,11 @@ export default function MyDay() {
     
     // Keep the selected task updated
     setSelectedTask(updatedTask);
+    
+    // If task was completed, close the panel
+    if (updatedTask.completed && isPanelOpen && selectedTask && selectedTask._id === updatedTask._id) {
+      closePanel();
+    }
   };
   
   const handleTaskDeleted = (taskId) => {
@@ -103,15 +108,16 @@ export default function MyDay() {
   
   const closePanel = () => {
     setIsPanelOpen(false);
-    // Small delay to let the animation complete before clearing the selected task
     setTimeout(() => {
       setSelectedTask(null);
     }, 300);
   };
 
   return (
-    <div className="container mx-auto p-4 mb-20">
-      <h1 className="text-2xl font-bold mb-6 text-white">My Day</h1>
+    <div className="container mx-auto p-16 h-screen flex flex-col">
+      <h1 className="text-5xl font-bold mb-4 p-4 text-white">My Day</h1>
+      <p className="text-gray-400 mb-4">{format(new Date(), 'EEEE, MMMM d')}</p>
+      
       <TaskInput onTaskAdded={handleTaskAdded} />
       
       {isLoading ? (
@@ -119,7 +125,7 @@ export default function MyDay() {
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : tasks.length > 0 ? (
-        <div className="space-y-3 mt-6">
+        <div className="flex-1 overflow-y-auto mt-8 rounded-lg">
           {tasks.map(task => (
             <TaskItem 
               key={task._id}

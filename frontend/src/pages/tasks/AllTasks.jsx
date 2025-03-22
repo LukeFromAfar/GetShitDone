@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Star, Calendar } from 'lucide-react';
 import TaskInput from '../../components/TaskInput';
 import TaskItem from '../../components/TaskItem';
 import TaskDetailsPanel from '../../components/TaskDetailsPanel';
 import axios from 'axios';
-import allTasksImage from '../../assets/images/all-tasks.jpg';
 
 export default function AllTasks() {
   const [tasks, setTasks] = useState([]);
@@ -86,27 +84,65 @@ export default function AllTasks() {
     }, 300);
   };
 
+  // Separate active and completed tasks
+  const activeTasks = tasks.filter(task => !task.completed);
+  const completedTasks = tasks.filter(task => task.completed);
+
   return (
-    <div className="container mx-auto p-4 mb-20">
-      <h1 className="text-2xl font-bold mb-6 text-white">
+    <div className="container mx-auto p-16 h-screen flex flex-col">
+      <h1 className="text-5xl font-bold mb-6 p-4 text-white">
         {searchQuery ? `Search Results: "${searchQuery}"` : 'All Tasks'}
       </h1>
-      <TaskInput onTaskAdded={handleTaskAdded} />
+      <TaskInput onTaskAdded={handleTaskAdded} className="flex-shrink-0" />
       
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : tasks.length > 0 ? (
-        <div className="space-y-3 mt-6">
-          {tasks.map(task => (
-            <TaskItem 
-              key={task._id}
-              task={task}
-              onTaskClick={handleTaskClick}
-              onTaskUpdated={handleTaskUpdated}
-            />
-          ))}
+        <div className="flex-1 overflow-y-auto mt-8 rounded-lg">
+          {/* Active Tasks */}
+          {activeTasks.length > 0 && (
+            <div className="space-y-3">
+              {activeTasks.map(task => (
+                <TaskItem 
+                  key={task._id}
+                  task={task}
+                  onTaskClick={handleTaskClick}
+                  onTaskUpdated={handleTaskUpdated}
+                />
+              ))}
+            </div>
+          )}
+          
+          {/* Completed Tasks Section (only show if there are completed tasks) */}
+          {completedTasks.length > 0 && (
+            <div className="mt-8">
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-600"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="px-4 bg-gray-800 text-sm text-gray-500">
+                    Completed Tasks ({completedTasks.length})
+                  </span>
+                </div>
+              </div>
+              
+              {/* Completed Tasks List */}
+              <div className="space-y-3 pb-4">
+                {completedTasks.map(task => (
+                  <TaskItem 
+                    key={task._id}
+                    task={task}
+                    onTaskClick={handleTaskClick}
+                    onTaskUpdated={handleTaskUpdated}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="bg-gray-800 rounded-lg py-12 px-4 text-center mt-8">
