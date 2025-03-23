@@ -114,18 +114,18 @@ export default function MyDay() {
   };
 
   return (
-    <div className="container mx-auto p-16 h-screen flex flex-col">
-      <h1 className="text-5xl font-bold mb-4 p-4 text-white">My Day</h1>
-      <p className="text-gray-400 mb-4">{format(new Date(), 'EEEE, MMMM d')}</p>
+    <div className="container mx-auto p-4 sm:p-8 md:p-16 h-screen flex flex-col">
+      <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 sm:mb-6 p-2 sm:p-4 text-white pt-16">My Day</h1>
+      <p className="text-gray-400 mb-4 px-2">{format(new Date(), 'EEEE, MMMM d')}</p>
       
       <TaskInput onTaskAdded={handleTaskAdded} />
       
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="flex justify-center items-center py-6 sm:py-12">
+          <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : tasks.length > 0 ? (
-        <div className="flex-1 overflow-y-auto mt-8 rounded-lg">
+        <div className="flex-1 overflow-y-auto mt-4 sm:mt-8 rounded-lg">
           {tasks.map(task => (
             <TaskItem 
               key={task._id}
@@ -136,9 +136,9 @@ export default function MyDay() {
           ))}
         </div>
       ) : (
-        <div className="bg-gray-800 rounded-lg py-12 px-4 text-center mt-8">
-          <p className="text-gray-400 text-lg">No tasks for today</p>
-          <p className="text-gray-500 mt-2">Add a task to get started</p>
+        <div className="bg-gray-800 rounded-lg py-6 sm:py-12 px-3 sm:px-4 text-center mt-4 sm:mt-8">
+          <p className="text-gray-400 text-base sm:text-lg">No tasks for today</p>
+          <p className="text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">Add a task to get started</p>
         </div>
       )}
       

@@ -61,14 +61,15 @@ export default function TaskItem({ task, onTaskClick, onTaskUpdated }) {
 
   return (
     <div 
-      className={`p-4 bg-gray-800/50 backdrop-blur-sm hover:bg-gray-700/60 rounded-lg shadow-md mb-2 flex items-center cursor-pointer transition-all ${
-        task.completed ? 'bg-gray-600/20 backdrop-blur-lg' : ''
-      }`}
+      className="p-3 sm:p-4 bg-gray-800/50 backdrop-blur-sm hover:bg-gray-700/60 rounded-lg shadow-md mb-2 flex items-center cursor-pointer transition-all"
       onClick={() => onTaskClick(task)}
     >
       <button
-        onClick={handleCheckboxClick}
-        className={`mr-4 w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer ${
+        onClick={(e) => {
+          e.stopPropagation();
+          handleCheckboxClick(e);
+        }}
+        className={`mr-3 sm:mr-4 w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer ${
           task.completed 
             ? 'bg-blue-500 border-blue-500 text-white' 
             : 'border-gray-500 hover:border-gray-300'
@@ -79,33 +80,33 @@ export default function TaskItem({ task, onTaskClick, onTaskUpdated }) {
         {task.completed && <Check className="h-4 w-4" />}
       </button>
       
-      <div className="flex-grow">
-        <h3 className={`text-lg text-white ${task.completed ? 'line-through text-gray-400' : ''}`}>
+      <div className="flex-grow min-w-0">
+        <h3 className={`text-base sm:text-lg text-white ${task.completed ? 'line-through text-gray-400' : ''} truncate`}>
           {task.title}
         </h3>
         
         {task.note && (
-          <p className="text-sm text-gray-400 mt-1 line-clamp-1">
+          <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-1 line-clamp-1">
             {task.note}
           </p>
         )}
         
-        <div className="flex items-center mt-2">
+        <div className="flex items-center mt-1 sm:mt-2">
           {task.important && (
-            <span className="mr-3">
+            <span className="mr-2 sm:mr-3">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
             </span>
           )}
           
           {task.dueDate && (
             <div 
-              className={`flex items-center text-sm ${
+              className={`flex items-center text-xs sm:text-sm ${
                 isPastDue(task.dueDate) 
                   ? 'text-red-500 line-through' 
                   : 'text-gray-400'
               }`}
             >
-              <Calendar size={14} className="mr-1" />
+              <Calendar size={12} className="mr-1" />
               {formatDate(task.dueDate)}
             </div>
           )}

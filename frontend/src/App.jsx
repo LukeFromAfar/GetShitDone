@@ -13,24 +13,27 @@ import AllTasks from './pages/tasks/AllTasks'
 import User from './pages/User'
 
 import { AuthProvider } from './context/AuthContext';
+import { UIProvider } from './context/UIContext';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            {/* Redirect the root path to my-day */}
-            <Route index element={<Navigate to="/my-day" replace />} />
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
-            <Route path="my-day" element={<MyDay />} />
-            <Route path="important" element={<Important />} />
-            <Route path="planned" element={<Planned />} />
-            <Route path="all-tasks" element={<AllTasks />} />
-            <Route path="user" element={<User />} />
-          </Route>
-        </Routes>
+        <UIProvider>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              {/* Redirect the root path to my-day */}
+              <Route index element={<Navigate to="/my-day" replace />} />
+              <Route path="login" element={<Login />} />
+              <Route path="register" element={<Register />} />
+              <Route path="my-day" element={<MyDay />} />
+              <Route path="important" element={<Important />} />
+              <Route path="planned" element={<Planned />} />
+              <Route path="all-tasks" element={<AllTasks />} />
+              <Route path="user" element={<User />} />
+            </Route>
+          </Routes>
+        </UIProvider>
       </AuthProvider>
     </BrowserRouter>
   )

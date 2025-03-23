@@ -11,6 +11,23 @@ export default function User() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState(null);
 
+  // ADD THIS: Track container height to ensure background covers entire content
+  const [minHeight, setMinHeight] = useState('100vh');
+
+  // Adjust min-height when delete confirmation changes
+  useEffect(() => {
+    // Give the DOM time to update after state changes
+    const timer = setTimeout(() => {
+      // Set min-height to at least window height or more if content is taller
+      const windowHeight = window.innerHeight;
+      const contentHeight = document.getElementById('user-profile-container')?.scrollHeight || 0;
+      setMinHeight(`${Math.max(windowHeight, contentHeight)}px`);
+    }, 50);
+    
+    return () => clearTimeout(timer);
+  }, [showDeleteConfirm, error, isDeleting]);
+
+
   useEffect(() => {
     if (!isLoading && !user) {
       navigate('/login');
@@ -83,21 +100,22 @@ export default function User() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl mb-20">
-      <h1 className="text-3xl font-bold mb-6 pt-16 text-white">User Profile</h1>
+    <div className="container mx-auto p-4 max-w-2xl mb-10 sm:mb-20">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 pt-8 sm:pt-16 text-white">User Profile</h1>
       
       <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-        <div className="bg-gray-700 p-6 flex items-center border-b border-gray-600">
-          <div className="bg-blue-600 rounded-full p-3">
-            <UserCircle size={36} className="text-white" />
+        {/* User header */}
+        <div className="bg-gray-700 p-4 sm:p-6 flex items-center border-b border-gray-600">
+          <div className="bg-blue-600 rounded-full p-2 sm:p-3">
+            <UserCircle size={28} className="text-white sm:h-9 sm:w-9" />
           </div>
-          <div className="ml-4">
-            <h2 className="text-xl font-semibold text-white">{user.name}</h2>
-            <p className="text-blue-400">{user.email}</p>
+          <div className="ml-3 sm:ml-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">{user.name}</h2>
+            <p className="text-sm sm:text-base text-blue-400">{user.email}</p>
           </div>
         </div>
         
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           <div className="flex items-center bg-gray-700 p-4 rounded-lg">
             <Mail className="text-blue-400 mr-4" />
             <div>
@@ -130,7 +148,7 @@ export default function User() {
           )}
         </div>
         
-        <div className="p-6 border-t border-gray-600 space-y-4">
+        <div className="p-4 sm:p-6 border-t border-gray-600 space-y-3 sm:space-y-4">
           <button
             onClick={handleLogout}
             disabled={isDeleting}

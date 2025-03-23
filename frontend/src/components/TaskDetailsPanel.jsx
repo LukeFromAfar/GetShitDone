@@ -4,6 +4,7 @@ import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ding1Sound from '../assets/sounds/ding1.mp3';
+import { useUI } from '../context/UIContext';
 
 export default function TaskDetailsPanel({ task, isOpen, onClose, onTaskUpdated, onTaskDeleted }) {
   // State for current task data and edited version
@@ -13,6 +14,7 @@ export default function TaskDetailsPanel({ task, isOpen, onClose, onTaskUpdated,
   const [dueDate, setDueDate] = useState(null);
   const [isImportant, setIsImportant] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const { setIsTaskPanelOpen } = useUI();
   
   // Other state
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +46,13 @@ export default function TaskDetailsPanel({ task, isOpen, onClose, onTaskUpdated,
       setEditMode(false); // Exit edit mode when task changes
     }
   }, [task]);
+  
+  useEffect(() => {
+    setIsTaskPanelOpen(isOpen);
+    
+    // Clean up when component unmounts
+    return () => setIsTaskPanelOpen(false);
+  }, [isOpen, setIsTaskPanelOpen]);
   
   // Format date for display
   const formatDate = (date) => {
@@ -199,53 +208,53 @@ const toggleCompleted = async () => {
 
   return (
     <div className={`fixed inset-y-0 right-0 w-full md:w-96 bg-gray-800/50 backdrop-blur-md shadow-2xl transform transition-transform duration-300 z-50 flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-    {/* Header */}
-    <div className="flex justify-between items-center p-4 border-b border-gray-700/80">
-      <h2 className="text-xl font-semibold text-white">Task Details</h2>
-      <div className="flex space-x-2">
-        {editMode ? (
-          <>
-            <button
-              onClick={handleSaveChanges}
-              disabled={isLoading}
-              className="p-2 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg transition-colors cursor-pointer"
-              aria-label="Save changes"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-              ) : (
-                <Save size={20} />
-              )}
-            </button>
-            <button
-              onClick={toggleEditMode}
-              disabled={isLoading}
-              className="p-2 bg-gray-700/80 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer"
-              aria-label="Cancel editing"
-            >
-              <X size={20} />
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={toggleEditMode}
-              className="p-2 bg-gray-700/80 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer"
-              aria-label="Edit task"
-            >
-              <Edit size={20} />
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 bg-gray-700/80 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer"
-              aria-label="Close panel"
-            >
-              <X size={20} />
-            </button>
-          </>
-        )}
+      {/* Header */}
+      <div className="flex justify-between items-center p-3 sm:p-4 border-b border-gray-700/80">
+        <h2 className="text-lg sm:text-xl font-semibold text-white">Task Details</h2>
+        <div className="flex space-x-2">
+          {editMode ? (
+            <>
+              <button
+                onClick={handleSaveChanges}
+                disabled={isLoading}
+                className="p-1 sm:p-2 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg transition-colors cursor-pointer"
+                aria-label="Save changes"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                ) : (
+                  <Save size={18} />
+                )}
+              </button>
+              <button
+                onClick={toggleEditMode}
+                disabled={isLoading}
+                className="p-1 sm:p-2 bg-gray-700/80 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer"
+                aria-label="Cancel editing"
+              >
+                <X size={18} />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={toggleEditMode}
+                className="p-1 sm:p-2 bg-gray-700/80 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer"
+                aria-label="Edit task"
+              >
+                <Edit size={18} />
+              </button>
+              <button
+                onClick={onClose}
+                className="p-1 sm:p-2 bg-gray-700/80 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer"
+                aria-label="Close panel"
+              >
+                <X size={18} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
-    </div>
       
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4">
@@ -375,7 +384,7 @@ const toggleCompleted = async () => {
       
       {/* Footer */}
       <div className="border-t border-gray-700 p-4">
-        <div className={`flex ${editMode ? 'justify-between' : 'justify-end'}`}>
+        <div className={`flex ${editMode ? 'justify-start' : 'justify-start'}`}>
             <button
             onClick={handleDeleteTask}
             disabled={isLoading}

@@ -51,7 +51,7 @@ export default function Layout() {
       {!isAuthPage && <Sidebar />}
       
       <div 
-        className="flex flex-col flex-grow relative"
+        className="flex flex-col flex-grow relative" 
         style={{ 
           backgroundImage: `url(${backgroundImage})`,
           backgroundSize: 'cover',

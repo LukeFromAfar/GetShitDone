@@ -148,14 +148,14 @@ export default function TaskInput({ onTaskAdded }) {
   if (!user) return null; // Don't show input if user is not logged in
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg p-3">
+    <div className="w-full max-w-3xl mx-auto bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg p-2 sm:p-3">
       <form onSubmit={handleSubmit} className="flex items-center">
         <button 
           type="submit" 
-          className="p-2 rounded-full hover:bg-gray-700/70 text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
+          className="p-1.5 sm:p-2 rounded-full hover:bg-gray-700/70 text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
           disabled={isLoading || !title.trim()}
         >
-          <Plus className="h-6 w-6" />
+          <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
         
         <input
@@ -164,7 +164,7 @@ export default function TaskInput({ onTaskAdded }) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={getPlaceholder()}
-          className="flex-grow px-4 py-2 bg-transparent text-white outline-none"
+          className="flex-grow px-2 sm:px-4 py-1.5 sm:py-2 bg-transparent text-white text-sm sm:text-base outline-none"
           disabled={isLoading}
         />
         
