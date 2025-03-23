@@ -56,12 +56,12 @@ export default function Sidebar() {
             </button>
             {isOpen && (
               <div className="relative flex-grow mx-2">
-                <input
+                <input 
                   type="text"
                   value={searchQuery}
-                  onChange={handleSearchChange}
-                  placeholder="Search tasks"
-                  className="bg-gray-700 text-white p-2 rounded w-full pr-8"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search tasks..."
+                  className="search-input bg-gray-700 text-white rounded-lg px-4 py-2 w-full"
                 />
                 {searchQuery && (
                   <button 

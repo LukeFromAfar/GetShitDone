@@ -198,54 +198,54 @@ const toggleCompleted = async () => {
   }
 
   return (
-    <div className={`fixed inset-y-0 right-0 w-full md:w-96 bg-gray-800 shadow-lg transform transition-transform duration-300 z-50 flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b border-gray-700">
-        <h2 className="text-xl font-semibold text-white">Task Details</h2>
-        <div className="flex space-x-2">
-          {editMode ? (
-            <>
-              <button
-                onClick={handleSaveChanges}
-                disabled={isLoading}
-                className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                aria-label="Save changes"
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-                ) : (
-                  <Save size={20} />
-                )}
-              </button>
-              <button
-                onClick={toggleEditMode}
-                disabled={isLoading}
-                className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                aria-label="Cancel editing"
-              >
-                <X size={20} />
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={toggleEditMode}
-                className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                aria-label="Edit task"
-              >
-                <Edit size={20} />
-              </button>
-              <button
-                onClick={onClose}
-                className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                aria-label="Close panel"
-              >
-                <X size={20} />
-              </button>
-            </>
-          )}
-        </div>
+    <div className={`fixed inset-y-0 right-0 w-full md:w-96 bg-gray-800/50 backdrop-blur-md shadow-2xl transform transition-transform duration-300 z-50 flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+    {/* Header */}
+    <div className="flex justify-between items-center p-4 border-b border-gray-700/80">
+      <h2 className="text-xl font-semibold text-white">Task Details</h2>
+      <div className="flex space-x-2">
+        {editMode ? (
+          <>
+            <button
+              onClick={handleSaveChanges}
+              disabled={isLoading}
+              className="p-2 bg-blue-600/90 hover:bg-blue-700 text-white rounded-lg transition-colors cursor-pointer"
+              aria-label="Save changes"
+            >
+              {isLoading ? (
+                <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+              ) : (
+                <Save size={20} />
+              )}
+            </button>
+            <button
+              onClick={toggleEditMode}
+              disabled={isLoading}
+              className="p-2 bg-gray-700/80 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer"
+              aria-label="Cancel editing"
+            >
+              <X size={20} />
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={toggleEditMode}
+              className="p-2 bg-gray-700/80 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer"
+              aria-label="Edit task"
+            >
+              <Edit size={20} />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 bg-gray-700/80 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer"
+              aria-label="Close panel"
+            >
+              <X size={20} />
+            </button>
+          </>
+        )}
       </div>
+    </div>
       
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4">
@@ -379,7 +379,7 @@ const toggleCompleted = async () => {
             <button
             onClick={handleDeleteTask}
             disabled={isLoading}
-            className="flex items-center text-red-500 hover:text-red-400"
+            className="flex items-center text-red-500 hover:text-red-400 cursor-pointer"
             >
             <Trash2 size={18} className="mr-1" />
             <span>Delete</span>

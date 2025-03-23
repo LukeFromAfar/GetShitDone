@@ -61,8 +61,8 @@ export default function TaskItem({ task, onTaskClick, onTaskUpdated }) {
 
   return (
     <div 
-      className={`p-4 bg-gray-800 hover:bg-gray-700 rounded-lg shadow-md mb-2 flex items-center cursor-pointer transition-all ${
-        task.completed ? 'opacity-60' : ''
+      className={`p-4 bg-gray-800/50 backdrop-blur-sm hover:bg-gray-700/60 rounded-lg shadow-md mb-2 flex items-center cursor-pointer transition-all ${
+        task.completed ? 'bg-gray-600/20 backdrop-blur-lg' : ''
       }`}
       onClick={() => onTaskClick(task)}
     >
