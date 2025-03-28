@@ -36,6 +36,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/note', noteRoutes);
 
 app.listen(SERVER_PORT, () => {
-  console.log(`Server is running on port ${SERVER_PORT}`);
+  console.log(`Server is running on port`);
   console.log("   __ __  ____  ____  ____ \n  / // / / __ \\/ __ \\/ __ \\\n / // /_/ / / / / / / / / /\n/__  __/ /_/ / /_/ / /_/ / \n  /_/  \\____/\\____/\\____/  \n                           ");
 });
