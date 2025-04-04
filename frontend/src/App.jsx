@@ -10,6 +10,7 @@ import MyDay from './pages/tasks/MyDay'
 import Important from './pages/tasks/Important'
 import Planned from './pages/tasks/Planned'
 import AllTasks from './pages/tasks/AllTasks'
+import Calendar from './pages/tasks/Calendar' // Add this import
 import User from './pages/User'
 
 import { AuthProvider } from './context/AuthContext';
@@ -29,6 +30,7 @@ function App() {
               <Route path="my-day" element={<MyDay />} />
               <Route path="important" element={<Important />} />
               <Route path="planned" element={<Planned />} />
+              <Route path="calendar" element={<Calendar />} /> {/* Add this route */}
               <Route path="all-tasks" element={<AllTasks />} />
               <Route path="user" element={<User />} />
             </Route>
@@ -39,4 +41,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

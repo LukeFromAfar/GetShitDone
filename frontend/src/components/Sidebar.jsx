@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Sun, Star, Calendar, Home, ChevronRight, ChevronLeft, Search, User, X, Menu } from 'lucide-react';
+import { Sun, Star, Calendar, CalendarDays, Home, ChevronRight, ChevronLeft, Search, User, X, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useUI } from '../context/UIContext';
 
@@ -158,6 +158,19 @@ export default function Sidebar() {
                     <span>Planned</span>
                   </NavLink>
                 </li>
+                  {/* Add Calendar Link */}
+                  <li>
+                    <NavLink
+                      to="/calendar"
+                      className={({ isActive }) =>
+                        `flex items-center px-3 py-2.5 rounded-lg text-white ${isActive ? 'bg-gray-700' : 'hover:bg-gray-700/50'}`
+                      }
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <CalendarDays size={18} className="mr-3" />
+                      <span>Calendar</span>
+                    </NavLink>
+                  </li>
                 <li>
                   <NavLink
                     to="/all-tasks"
@@ -238,67 +251,83 @@ export default function Sidebar() {
         </div>
         
         <ul className="space-y-1 mt-4 flex-grow">
-          <li>
-            <NavLink
-              to="/my-day"
-              className={({ isActive }) =>
-                isActive 
-                  ? 'flex items-center px-4 py-2 bg-gray-700 w-full text-white' 
-                  : 'flex items-center px-4 py-2 w-full hover:bg-gray-700/50 text-white'
-              }
-            >
-              <div className={isOpen ? "mr-3 flex items-center justify-center" : "w-full flex items-center justify-center"}>
-                <Sun size={isOpen ? 18 : 20} />
-              </div>
-              <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 w-0 absolute'}`}>My Day</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/important"
-              className={({ isActive }) =>
-                isActive 
-                  ? 'flex items-center px-4 py-2 bg-gray-700 w-full text-white' 
-                  : 'flex items-center px-4 py-2 w-full hover:bg-gray-700/50 text-white'
-              }
-            >
-              <div className={isOpen ? "mr-3 flex items-center justify-center" : "w-full flex items-center justify-center"}>
-                <Star size={isOpen ? 18 : 20} />
-              </div>
-              <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 w-0 absolute'}`}>Important</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/planned"
-              className={({ isActive }) =>
-                isActive 
-                  ? 'flex items-center px-4 py-2 bg-gray-700 w-full text-white' 
-                  : 'flex items-center px-4 py-2 w-full hover:bg-gray-700/50 text-white'
-              }
-            >
-              <div className={isOpen ? "mr-3 flex items-center justify-center" : "w-full flex items-center justify-center"}>
-                <Calendar size={isOpen ? 18 : 20} />
-              </div>
-              <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 w-0 absolute'}`}>Planned</span>
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/all-tasks"
-              className={({ isActive }) =>
-                isActive 
-                  ? 'flex items-center px-4 py-2 bg-gray-700 w-full text-white' 
-                  : 'flex items-center px-4 py-2 w-full hover:bg-gray-700/50 text-white'
-              }
-            >
-              <div className={isOpen ? "mr-3 flex items-center justify-center" : "w-full flex items-center justify-center"}>
-                <Home size={isOpen ? 18 : 20} />
-              </div>
-              <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 w-0 absolute'}`}>All Tasks</span>
-            </NavLink>
-          </li>
-        </ul>
+        <li>
+          <NavLink
+            to="/my-day"
+            className={({ isActive }) =>
+              isActive 
+                ? 'flex items-center px-4 py-2 bg-gray-700 w-full text-white' 
+                : 'flex items-center px-4 py-2 w-full hover:bg-gray-700/50 text-white'
+            }
+          >
+            <div className={isOpen ? "mr-3 flex items-center justify-center" : "w-full flex items-center justify-center"}>
+              <Sun size={isOpen ? 18 : 20} />
+            </div>
+            <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 w-0 absolute'}`}>My Day</span>
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/important"
+            className={({ isActive }) =>
+              isActive 
+                ? 'flex items-center px-4 py-2 bg-gray-700 w-full text-white' 
+                : 'flex items-center px-4 py-2 w-full hover:bg-gray-700/50 text-white'
+            }
+          >
+            <div className={isOpen ? "mr-3 flex items-center justify-center" : "w-full flex items-center justify-center"}>
+              <Star size={isOpen ? 18 : 20} />
+            </div>
+            <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 w-0 absolute'}`}>Important</span>
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/planned"
+            className={({ isActive }) =>
+              isActive 
+                ? 'flex items-center px-4 py-2 bg-gray-700 w-full text-white' 
+                : 'flex items-center px-4 py-2 w-full hover:bg-gray-700/50 text-white'
+            }
+          >
+            <div className={isOpen ? "mr-3 flex items-center justify-center" : "w-full flex items-center justify-center"}>
+              <Calendar size={isOpen ? 18 : 20} />
+            </div>
+            <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 w-0 absolute'}`}>Planned</span>
+          </NavLink>
+        </li>
+        {/* Add Calendar Link */}
+        <li>
+          <NavLink
+            to="/calendar"
+            className={({ isActive }) =>
+              isActive 
+                ? 'flex items-center px-4 py-2 bg-gray-700 w-full text-white' 
+                : 'flex items-center px-4 py-2 w-full hover:bg-gray-700/50 text-white'
+            }
+          >
+            <div className={isOpen ? "mr-3 flex items-center justify-center" : "w-full flex items-center justify-center"}>
+              <CalendarDays size={isOpen ? 18 : 20} />
+            </div>
+            <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 w-0 absolute'}`}>Calendar</span>
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/all-tasks"
+            className={({ isActive }) =>
+              isActive 
+                ? 'flex items-center px-4 py-2 bg-gray-700 w-full text-white' 
+                : 'flex items-center px-4 py-2 w-full hover:bg-gray-700/50 text-white'
+            }
+          >
+            <div className={isOpen ? "mr-3 flex items-center justify-center" : "w-full flex items-center justify-center"}>
+              <Home size={isOpen ? 18 : 20} />
+            </div>
+            <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 w-0 absolute'}`}>All Tasks</span>
+          </NavLink>
+        </li>
+      </ul>
         
         <div className="flex items-center p-4 border-t border-gray-700 text-white">
           {!isLoading && user ? (

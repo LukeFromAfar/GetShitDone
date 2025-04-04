@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import myDayImage from "../assets/images/my-day.jpg";
 import importantImage from "../assets/images/important.jpg";
 import plannedImage from "../assets/images/planned.jpg";
+import calendarImage from "../assets/images/planned.jpg";
 import allTasksImage from "../assets/images/all-tasks.jpg";
 import userImage from "../assets/images/user.jpg"; 
 import authImage from "../assets/images/auth.jpg"; // Import auth image
@@ -25,6 +26,9 @@ export default function Layout() {
         break;
       case "/planned":
         setBackgroundImage(plannedImage);
+        break;
+      case "/calendar": // Add this case
+        setBackgroundImage(calendarImage);
         break;
       case "/all-tasks":
         setBackgroundImage(allTasksImage);

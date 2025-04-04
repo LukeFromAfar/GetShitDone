@@ -265,7 +265,7 @@ export default function Planned() {
   return (
     <div className="container mx-auto p-4 sm:p-8 md:p-16 h-screen flex flex-col">
       <div className="flex items-center justify-between mb-4 pt-16">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Planned</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white">Planned</h1>
         
         {/* Desktop filter buttons */}
         <div className="hidden md:flex flex-wrap gap-2">
