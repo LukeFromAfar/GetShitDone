@@ -1,6 +1,6 @@
 const User = require('../models/UserSchema');
 const Note = require('../models/NoteSchema')
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const createJWT = require('../utils/createJWT');
 const createCookie = require('../utils/createCookie');
 

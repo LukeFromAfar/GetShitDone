@@ -1,0 +1,51 @@
+services:
+  frontend:
+    build: 
+      context: ./frontend
+      platforms: 
+        - linux/arm64
+    ports: 
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    env_file:
+      - ./frontend/.env.docker
+    depends_on:
+      - backend
+    networks:
+      - app-network
+  
+  backend:
+    build: 
+      context: ./backend
+      platforms: 
+        - linux/arm64
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./backend/.env.docker
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+  
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    command: ["mongod", "--logpath", "/dev/stdout", "--quiet"]
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

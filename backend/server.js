@@ -12,15 +12,19 @@ const SERVER_PORT = process.env.SERVER_PORT || 4000;
 
 // Fix: Use process.env.FRONTEND_URL and add a fallback
 let corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:3000', 
+    'http://frontend:3000',
+    'http://localhost:3000'
+  ],
   credentials: true,
   methods: 'GET, POST, PUT, DELETE',
-  optionSuccessStatus: 200
+  optionsSuccessStatus: 200
 }
 
 app.use(cors(corsOptions));
 
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/get-shit-done')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -34,6 +38,11 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/note', noteRoutes);
+
+console.log("Environment variables:");
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+console.log("MONGODB_URI:", process.env.MONGODB_URI);
+console.log("SERVER_PORT:", process.env.SERVER_PORT);
 
 app.listen(SERVER_PORT, () => {
   console.log(`Server is running on port`);
